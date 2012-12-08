@@ -7,3 +7,5 @@ Robogram's primary strength lies in its simplicity. Marvin just works out-of-the
 It's not just for kids. At its core, Robogram can be controlled using a simple bluetooth protocol wrapped inside several open-source APIs. This means that it's an excellent robot platform for hobbyists interested in building anything that needs to move!
 
 These open-source APIs also mean that when the time comes to advance beyond the basics, robogrammers can learn to program using industry-standard programming languages like Python or Java. With the proper foundation, translating these skills to other environments is a breeze.
+
+- Kevin Dolan
