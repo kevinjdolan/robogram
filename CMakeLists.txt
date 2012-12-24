@@ -5,4 +5,4 @@ set(
     atmega328p
 )
 
-add_subdirectory( src )
+add_subdirectory(src)
