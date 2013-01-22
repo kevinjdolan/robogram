@@ -13,13 +13,20 @@ void bluetoothInit() {
 }
 
 char read() {
-    while(1) {
-        smallBuffer = uart_getc();
-        if(!(smallBuffer & UART_NO_DATA)) {
-            return (unsigned char) smallBuffer;
-        }
+    while(!(smallBuffer = readAsync())) {}
+    return smallBuffer;
+}
+
+char readAsync() {
+    smallBuffer = uart_getc();
+    if(!(smallBuffer & UART_NO_DATA)) {
+        return (unsigned char) smallBuffer;
+    }
+    else {
+        return 0;
     }
 }
+
 
 int readNumber() {
     char current = 0;
@@ -41,6 +48,10 @@ int readNumber() {
 
 void write(char txt[]) {
     uart_puts(txt);
+}
+
+void writeChar(char txt) {
+    uart_putc(txt);
 }
 
 void writeNumber(unsigned int number) {

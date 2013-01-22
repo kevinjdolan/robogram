@@ -1,4 +1,4 @@
-To initialize for building, do:
+To initialize for building, do the following in the embedded directory:
 
     mkdir build
     cd build

@@ -4,7 +4,7 @@
 #include "io.h"
 #include "sensors.h"
 
-volatile unsigned int irValue = 0;
+volatile unsigned short irValue = 0;
 
 void sensorsInit() {
     ioWriteHigh(FRONT_BUMPER);
@@ -27,7 +27,7 @@ void sensorsInit() {
     ADCSRB = 0;
 }
 
-unsigned int getIrValue() {
+unsigned short getIrValue() {
     return irValue;
 }
 

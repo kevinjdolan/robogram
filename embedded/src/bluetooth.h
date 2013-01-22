@@ -9,6 +9,11 @@ void bluetoothInit();
 char read();
 
 /**
+ * Read a single character, possibly returning null.
+ */
+char readAsync();
+
+/**
  * Read in an integer.
  */
 int readNumber();
@@ -17,6 +22,11 @@ int readNumber();
  * Write a string.
  */
 void write(char txt[]);
+
+/**
+ * Write a single characer.
+ */
+void writeChar(char txt);
 
 /**
  * Write a number to bluetooth.

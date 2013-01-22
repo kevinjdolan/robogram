@@ -10,4 +10,4 @@ void sensorsInit();
 /**
  * Return the value of the ir sensor.
  */
-unsigned int getIrValue();
+unsigned short getIrValue();
