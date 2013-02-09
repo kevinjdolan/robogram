@@ -1,7 +1,7 @@
 import serial
+import time
 
-
-ser = serial.Serial('/dev/rfcomm0', 9600, timeout=10)
+ser = serial.Serial('/dev/rfcomm0', 19200, timeout=10)
 
 def readSync():
     buffer = ""
@@ -12,35 +12,16 @@ def readSync():
         else: buffer += next
     return buffer
     
-def writeVerify(msg):
-    for char in msg:
-        ser.write(char)
-        while ser.read() != char: pass
-
 def command(msg):
-    writeVerify(msg)
+    ser.write(msg)
     return readSync()
 
 print "connected"
 
-import time
-
-start = time.time();
-print command("[GS]")
-print time.time() - start
-
-start = time.time();
-print command("[GS]")
-print time.time() - start
-
-start = time.time();
-print command("[GS]")
-print time.time() - start
-
-start = time.time();
-print command("[GS]")
-print time.time() - start
-
-#while command("[GS]")[0] != 'F': pass
-#print command("[MV00F00F]")
+for i in range(0,4):
+    print command("[MV44F44F]")
+    time.sleep(8)
+    print command("[MV44F00F]")
+    time.sleep(0.9)
+    
 ser.close()

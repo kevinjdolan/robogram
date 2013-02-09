@@ -70,10 +70,6 @@ char getMessageType() {
 char readMessage() {
     char next = readAsync();
     
-    if(next) {
-        writeChar(next);
-    }
-    
     if(messageState == MESSAGE_STATE_IDLE) {
         if(next == '[') {
             position = 0;
