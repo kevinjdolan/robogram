@@ -2,30 +2,23 @@
 
 #include <stdlib.h>
 
-#include "bluetooth.h"
+#include <avr/interrupt.h>
+#include <avr/io.h>
+
+#include "eyes.h"
 #include "speakeasy.h"
 
-volatile char messageState = MESSAGE_STATE_IDLE;
-volatile char buffer[SPEAKEASY_BUFFER_SIZE];
-volatile char position = 0;
+volatile char readState = READ_STATE_IDLE;
+volatile char sendState = SEND_STATE_IDLE;
+volatile char readBuffer[SPEAKEASY_BUFFER_SIZE];
+volatile char writeBuffer[SPEAKEASY_BUFFER_SIZE];
+volatile char readPosition = 0;
+volatile char writePosition = 0;
+volatile char sendPosition = 0;
 volatile char numBuffer[16];
 
-void acknowledgeMessage() {
-    startMessage();
-    sendMessageString("OK");
-    endMessage();
-}
-
-void clearMessage() {
-    messageState = MESSAGE_STATE_IDLE;
-}
-
-void endMessage() {
-    writeChar(']');
-}
-
 char getMessageChar(char index) {
-    return buffer[2 + index];
+    return readBuffer[2 + index];
 }
 
 unsigned int getMessageNumber(char index, char length) {
@@ -56,10 +49,10 @@ unsigned int getMessageNumber(char index, char length) {
 }
 
 char getMessageType() {
-    if(!strncmp(buffer, "GS", 2)) {
+    if(!strncmp(readBuffer, "GS", 2)) {
         return MESSAGE_GET_STATE;
     } 
-    else if(!strncmp(buffer, "MV", 2)) {
+    else if(!strncmp(readBuffer, "MV", 2)) {
         return MESSAGE_MOVE;
     }
     else {
@@ -68,48 +61,106 @@ char getMessageType() {
 }
 
 char readMessage() {
-    char next = readAsync();
+    if(readState == READ_STATE_READY) {
+        return getMessageType();
+    }
+    else {
+        return 0;
+    }
+}
+
+void sendMessage() {
+    sendState = SEND_STATE_START;
+    sendPosition = 0;
+    UCSR0B |= _BV(UDRIE0);
     
-    if(messageState == MESSAGE_STATE_IDLE) {
-        if(next == '[') {
-            position = 0;
-            messageState = MESSAGE_STATE_RECEIVING;
-        }
+    // block until message has been sent
+    while(sendState != SEND_STATE_IDLE) {}
+    
+    readState = READ_STATE_IDLE;
+}
+
+void speakeasyInit() {
+    unsigned int baudrate = UART_BAUD_SELECT(UART_BAUD_RATE, F_CPU);
+    
+    /* Set baud rate */
+    if (baudrate & 0x8000) {
+   		UCSR0A = (1 << U2X0);  //Enable 2x speed 
+   		baudrate &= ~0x8000;
+   	}
+    UBRR0H = (unsigned char)(baudrate>>8);
+    UBRR0L = (unsigned char) baudrate;
+
+    /* Enable USART receiver and transmitter and receive complete interrupt */
+    UCSR0B = _BV(RXCIE0) | (1<<RXEN0) | (1<<TXEN0);
+    
+    /* Set frame format: asynchronous, 8data, no parity, 1stop bit */
+    UCSR0C = (3<<UCSZ00);
+}
+
+void writeMessageChar(char txt) {
+    writeBuffer[writePosition] = txt;
+    writePosition += 1;
+}
+
+void writeMessageString(const char *s) {
+    while (*s) {
+      writeMessageChar(*s++);
     }
-    else if(messageState == MESSAGE_STATE_RECEIVING) {
-        if(next == ']') {
-            messageState = MESSAGE_STATE_READY;
-            buffer[position] = 0;
-        }
-        else if(next) {
-            buffer[position] = next;
-            position += 1;
-        }
-    }
-
-    return messageState == MESSAGE_STATE_READY;
 }
 
-void sendMessageChar(char txt) {
-    writeChar(txt);
-}
-
-void sendMessageString(char txt[]) {
-    write(txt);
-}
-
-void sendMessageNumber(unsigned int value, char length) {
+void writeMessageNumber(unsigned int value, char length) {
     itoa(value, numBuffer, 16);
     char count = 0;
     while(numBuffer[count]) {
-        sendMessageChar(numBuffer[count]);
+        writeMessageChar(numBuffer[count]);
         count += 1;
     }
     for(;count < length; count++) {
-        sendMessageChar('=');
+        writeMessageChar('=');
     }
 }
 
-void startMessage() {
-    writeChar('[');
+ISR(USART_RX_vect) {
+    //Assume no error for now
+    //unsigned char usr = UCSR0A;
+    
+    unsigned char next = UDR0;
+    if(readState == READ_STATE_IDLE) {
+        if(next == '[') {
+            readPosition = 0;
+            readState = READ_STATE_RECEIVING;
+        }
+    }
+    else if(readState == READ_STATE_RECEIVING) {
+        if(next == ']') {
+            readState = READ_STATE_READY;
+            writePosition = 0;
+        }
+        else if(next) {
+            readBuffer[readPosition] = next;
+            readPosition += 1;
+        }
+    }
+}
+
+ISR(USART_UDRE_vect) {
+    if(sendState == SEND_STATE_START) {
+        UDR0 = '[';
+        sendState = SEND_STATE_SENDING;
+    }
+    else if(sendState == SEND_STATE_SENDING) {
+        if(sendPosition < writePosition) {
+            UDR0 = writeBuffer[sendPosition];
+            sendPosition += 1;
+        }
+        else {
+            UDR0 = ']';
+            sendState = SEND_STATE_COMPLETE;
+        }
+    }
+    else {
+        UCSR0B &= ~_BV(UDRIE0);
+        sendState = SEND_STATE_IDLE;
+    }
 }

@@ -1,25 +1,15 @@
-#define MESSAGE_STATE_IDLE 0
-#define MESSAGE_STATE_RECEIVING 1
-#define MESSAGE_STATE_READY 2
+#define READ_STATE_IDLE 0
+#define READ_STATE_RECEIVING 1
+#define READ_STATE_READY 2
 
-#define MESSAGE_UNKNOWN 0
-#define MESSAGE_GET_STATE 1
-#define MESSAGE_MOVE 2
+#define MESSAGE_UNKNOWN 1
+#define MESSAGE_GET_STATE 2
+#define MESSAGE_MOVE 3
 
-/**
- * Send the [OK] message.
- */
-void acknowledgeMessage();
-
-/**
- * Clear the current message.
- */
-void clearMessage();
-
-/**
- * End a message to the server.
- */
-void endMessage();
+#define SEND_STATE_IDLE 0
+#define SEND_STATE_START 1
+#define SEND_STATE_SENDING 2
+#define SEND_STATE_COMPLETE 3
 
 /**
  * Return the character at the provided index from the current message.
@@ -38,28 +28,35 @@ char getMessageType();
 
 /**
  * Check for data and add it to the buffer, possibly updating state.
- * Return 1 if a message available.
+ * Return message type if a message is available, 0 if not.
  */
 char readMessage();
 
-/**
- * Send some text to the server.
- */
-void sendMessageChar(char txt);
 
 /**
- * Send a hex-encoded number.
+ * Initialize to receive bluetooth messages.
+ */
+void speakeasyInit();
+
+/**
+ * Send the pending message.
+ */
+void sendMessage();
+
+/**
+ * Add a character to be sent to the server.
+ */
+void writeMessageChar(char txt);
+
+/**
+ * Add a hex-encoded number to be sent to the server.
  * Will pad the number with '=' on the end up to length.
  * If the number is bigger than length, uhhh...
  */
-void sendMessageNumber(unsigned int value, char length);
+void writeMessageNumber(unsigned int value, char length);
 
 /**
- * Send some text to the server.
+ * Add a string to be sent to the server.
  */
-void sendMessageString(char txt[]);
+void writeMessageString(const char *s);
 
-/**
- * Begin a message to the server.
- */
-void startMessage();

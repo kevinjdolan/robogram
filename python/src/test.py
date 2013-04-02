@@ -1,7 +1,7 @@
 import serial
 import time
 
-ser = serial.Serial('/dev/rfcomm0', 19200, timeout=10)
+ser = serial.Serial('/dev/rfcomm0', 115200, timeout=10)
 
 def readSync():
     buffer = ""
@@ -18,10 +18,14 @@ def command(msg):
 
 print "connected"
 
-for i in range(0,4):
-    print command("[MV44F44F]")
-    time.sleep(8)
-    print command("[MV44F00F]")
-    time.sleep(0.9)
+sum = 0
+for i in range(0, 100):
+    start = time.time()
+    print command("[GS]")
+    duration = time.time() - start
+    sum += duration
+    
+print "AVERAGE:"
+print sum / 100
     
 ser.close()

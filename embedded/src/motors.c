@@ -4,7 +4,6 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
-#include "bluetooth.h"
 #include "eyes.h"
 #include "io.h"
 #include "motors.h"
