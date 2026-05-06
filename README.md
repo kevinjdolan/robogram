@@ -1,6 +1,8 @@
 # Robogram
 
-An attempt to build a programmable robot toy to help teach kids how to code. The idea: a small two-wheeled robot that a child could control by writing simple programs on a connected computer, giving immediate physical feedback as their code runs.
+In 2013, I attempted to build a programmable robot toy to help teach kids how to code. The idea: a small two-wheeled robot that a child could control by writing simple programs on a connected computer, giving immediate physical feedback as their code runs.
+
+![The Robot](robot.jpeg)
 
 ## Overview
 
