@@ -4,6 +4,8 @@ In 2013, I attempted to build a programmable robot toy to help teach kids how to
 
 ![The Robot](robot.jpeg)
 
+It did catch on fire a little bit.
+
 ## Overview
 
 The robot communicates with a host computer over Bluetooth using a simple bracket-delimited message protocol. The host sends commands (e.g. move at a given speed), the robot executes them and responds with sensor state. The goal was to keep the protocol simple enough that a beginner could understand and extend it.
